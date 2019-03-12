@@ -1,0 +1,15 @@
+# Filesystem Related
+*.DS_Store
+
+# Racket related
+compiled
+.\#*
+\#*
+*~
+
+# Database files
+*.db
+
+# Docs Output
+json-sourcery/scribblings/*
+!json-sourcery/scribblings/json-sourcery.scrbl
