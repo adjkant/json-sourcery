@@ -6,7 +6,8 @@
 @(require scribble/example
           racket/sandbox
           (for-label "../main.rkt"
-                     racket))
+                     racket
+                     json))
 
 @(define sourcery-eval
    (parameterize ([sandbox-output 'string]

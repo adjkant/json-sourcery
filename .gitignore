@@ -13,3 +13,4 @@ compiled
 # Docs Output
 json-sourcery/scribblings/*
 !json-sourcery/scribblings/json-sourcery.scrbl
+json-sourcery/doc/*
