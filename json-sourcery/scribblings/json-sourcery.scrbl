@@ -5,7 +5,6 @@
 
 @(require scribble/example
           racket/sandbox
-          sql-sourcery
           (for-label "../main.rkt"
                      racket))
 
@@ -24,114 +23,75 @@
 @;{------------------------------------------------------------------------------------------------}
 @;{Documentation Start} 
 
-@title{WebSourcery}
+@title{JSONSourcery}
 
 @author{Adrian Kant}
 
-A Web Microframework for Racket
+JSONSourcery is a library built on top of the json base package in order to add automatic and manual
+JSON serialization in order to enable Racket values to be used directly for computation with less
+boilerplate needed to convert to JSON as well as adding clarifying syntax macros.
 
-In Development
 
-@(hyperlink "https://github.com/adjkant/web-sourcery"
-             "Github Repo")
+@(hyperlink "https://github.com/adjkant/json-sourcery"
+            "Github Repo")
 
-@defmodule[web-sourcery]
+@defmodule[json-sourcery]
 
-@;{------------------------------------------------------------------------------------------------}
-@section{Creating and Running WebSourcery App}
-
-@defform[(define-web-sourcery-app app-name)
-         #:contracts([app-name id?])
-         ]{
- Define a new WebSourcery app to add routes to.
-}
-
-@defform[(run-web-sourcery-app app-name)
-         #:contracts([app-name id?])
-         ]{
- Run an exisiting WebSourcery app.
-}
 
 @;{------------------------------------------------------------------------------------------------}
-@section{Defining Routes and Handlers}
+@section{JSON Serializers}
 
-@defform[(define-route [app-name route [method ...]] -> return-type
-           route-body)
-         #:contracts([app-name id?]
-                     [route string?]
-                     [method http-method?]
-                     [return-type (or JSON TEXT)]
-                     [route-body any])
-         ]{
- Defines a new route handler for the given app that matches on the given route.
- Things available in the body needing further documentation: method, params, cookies, headers
+@defform[(json-serializer-val predicate transformer)
+         #:contracts([predicate (-> any? boolean)]
+                     [transformer (-> any? any?)])]{
+ Create a JSON serializer for anything that passes the given predicate
+ using the given transformer
 }
 
-@defproc[(response [x (or string? json-serializable?)] [status http-status?])
-         response?]{
- A constructor for a response for any route handler
+@defform[(json-serializer-obj predicate (name accessor) ...)
+         #:contracts([predicate (-> any? boolean)]
+                     [name id]
+                     [accessor (-> any? any?)])]{
+ Create a JSON serializer for anything that passes the given predicate
+ using the given names and accessors to create a JSON object jsexpr
 }
 
-@;{------------------------------------------------------------------------------------------------}
-@section{HTTP Methods and Status Codes}
-
-@subsection{HTTP Methods}
-
-@defthing[GET http-method?]{
-  HTTP GET
+@defform[(json-serializer-struct [struct-name struct?])]{
+ Create a JSON serializer for the given struct automaticially using all fields of the structure to
+ create a json-serializer-obj
 }
 
-@defproc[(GET? [x any?]) boolean?]{
- A predicate for testing HTTP Methods                
-}
-
-@defthing[POST http-method?]{
-  HTTP POST
-}
-
-@defproc[(POST? [x any?]) boolean?]{
- A predicate for testing HTTP Methods                
-}
-
-@defthing[PUT http-method?]{
-  HTTP PUT
-}
-
-@defproc[(PUT? [x any?]) boolean?]{
- A predicate for testing HTTP Methods                
-}
-
-@defthing[DELETE http-method?]{
-  HTTP DELETE
-}
-
-@defproc[(DELETE? [x any?]) boolean?]{
- A predicate for testing HTTP Methods                
-}
-
-@defproc[(method->symbol [m http-method?]) symbol?]{
- Translate an HTTP Method to a symbol           
-}
-
-@subsection{HTTP Statuses}
-
-@defthing[200-OK http-status?]{
-  HTTP Ok Response
-}
-
-@defthing[404-NOT-FOUND http-status?]{
-  HTTP Not Found Response
-}
-
-@defproc[(custom-status [code natural?] [description string?]) http-status?]{
- A constructor for a custom HTTP statuses             
+@defproc[(json-serializer? [x any?])
+         boolean?]{
+ Predicate for JSON serializers
 }
 
 
 @;{------------------------------------------------------------------------------------------------}
-@section{Working With JSON}
+@section{Serialization}
 
-@subsection{JSON Object Shortcuts}
+@defproc[(json-serializable? [expr any?] [serializers (listof json-serializer?)])
+         boolean?]{
+ Determines if the given expression is serializable with the given serializers. Errors with
+ malformed serializers with the apropriate predicate use of accessor error
+}
+
+@defproc[(serialize-json [expr any?] [serializers (listof json-serializer?)])
+         jsexpr?]{
+ Attempts to serialize the expression with the given serializers. Guaranteed to succeed on any
+ expression that passes json-serializable?
+ If a unserializable value is encountered, the entire function will return the symbol 'failure.
+ Errors with  malformed serializers with the apropriate predicate use of accessor error.
+}
+
+@defproc[(serialize-failure? [expr any?])
+         boolean?]{
+ Semantic predicate for checking for failures (not errors) in serialize-json
+}
+
+
+@;{------------------------------------------------------------------------------------------------}
+@section{JSON Object Shortcuts}
 
 @defproc[(json-obj [kv-pairs (listof json-kv)])
          hash?]{
@@ -144,17 +104,3 @@ In Development
  Equivalent to list.
 }
 
-@subsection{JSON Serialization}
-
-@defproc[(json-serializer-struct [struct-name struct?])
-         json-serializer?]{
- Create a JSON serializer for the given struct using all fields of the structure
-}
-
-@defform[(json-serializer predicate (name accessor) ...)
-         #:contracts([predicate struct?]
-                     [name id]
-                     [accessor (-> any? json-serializable?)])]{
- Create a JSON serializer for anything that passes the given predicate
- using the given names and accessor
-}
