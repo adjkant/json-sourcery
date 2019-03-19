@@ -8,7 +8,7 @@
 
 (require (for-syntax racket/list
                      syntax/parse
-                     syntax/parse/class/struct-id
+                     "struct-id.rkt"
                      racket/syntax))
 
 ;; [Id-of Struct] -> [Maybe [List-of Symbol]]
