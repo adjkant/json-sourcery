@@ -242,7 +242,7 @@
     [(_ json-kvs)
      #'(if (list? json-kvs)
            (apply hash (foldr append '() json-kvs))
-           (apply hash (foldr append '() (list json-kv ...))))]
+           (apply hash (foldr append '() (list json-kvs))))]
     [(_ json-kv ...)
      #'(apply hash (foldr append '() (list json-kv ...)))]))
 
