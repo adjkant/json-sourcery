@@ -240,9 +240,9 @@
 (define-syntax json-obj
   (syntax-parser
     [(_ json-kvs)
-     #'(if (list? json-kvs)
+     #'(if (and (list? json-kvs) (list? (first json-kvs)))
            (apply hash (foldr append '() json-kvs))
-           (apply hash (foldr append '() (list json-kvs))))]
+           (apply hash json-kvs))]
     [(_ json-kv ...)
      #'(apply hash (foldr append '() (list json-kv ...)))]))
 
