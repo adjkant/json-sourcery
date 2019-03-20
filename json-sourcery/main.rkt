@@ -239,6 +239,10 @@
 ;; shorthand for creating a hash in the context of JSON with a list of json-kv pairs
 (define-syntax json-obj
   (syntax-parser
+    [(_ json-kvs)
+     #'(if (list? json-kvs)
+           (apply hash (foldr append '() json-kvs))
+           (apply hash (foldr append '() (list json-kv ...))))]
     [(_ json-kv ...)
      #'(apply hash (foldr append '() (list json-kv ...)))]))
 
