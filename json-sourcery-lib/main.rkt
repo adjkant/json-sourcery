@@ -46,7 +46,7 @@
 (define-syntax json-serializer-obj
   (syntax-parser
     [(_ predicate (field:id getter) ...)
-     (define field-strings (cons list (map id->string (syntax->list #'(field ...)))))
+     (define field-strings (cons #'list (map id->string (syntax->list #'(field ...)))))
      #`(json-sourcery-obj-serializer predicate
                                      (zip (map string->symbol #,field-strings)
                                           (list getter ...)))]))
